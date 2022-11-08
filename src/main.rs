@@ -2,7 +2,10 @@
 #![allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 use std::io::{self, Write};
 
+use crate::vec3::Color;
+
 mod vec3;
+mod color;
 
 fn main() {
     // Image dimensions
@@ -18,10 +21,8 @@ fn main() {
             let red = x as f64 / (IMAGE_WIDTH - 1) as f64;
             let green = y as f64 / (IMAGE_HEIGHT - 1) as f64;
             let blue = 0.25;
-            let red = (255.999 * red) as u8;
-            let green = (255.999 * green) as u8;
-            let blue = (255.999 * blue) as u8;
-            println!("{red} {green} {blue}"); 
+            let color = Color::new(red, green, blue);
+            color::write_color(&color);
         }
     }
     eprintln!("\nDone");

@@ -140,5 +140,5 @@ pub fn mul(t: f64, v: &Vec3) -> Vec3{
     Vec3(t * v.0, t * v.1, t * v.2)
 }
 
-type Point3 = Vec3;
-type Color = Vec3;
+pub type Point3 = Vec3;
+pub type Color = Vec3;
