@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use std::{ops::{Neg, Index, IndexMut, AddAssign, Add, Sub, Mul}, fmt};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Vec3(f64, f64, f64);
 
 impl Vec3{
@@ -9,15 +9,15 @@ impl Vec3{
         Self(e0, e1, e2)
     }
 
-    pub const fn x(&self) -> f64{
+    pub const fn x(self) -> f64{
         self.0
     }
 
-    pub const fn y(&self) -> f64{
+    pub const fn y(self) -> f64{
         self.1
     }
 
-    pub const fn z(&self) -> f64{
+    pub const fn z(self) -> f64{
         self.2
     }
 
@@ -33,19 +33,19 @@ impl Vec3{
         self.2 /= t;
     }
 
-    pub fn mul(&self, t: f64) -> Self{
+    pub fn mul(self, t: f64) -> Self{
         Self(t * self.0, t * self.1, t * self.2)
     }
 
-    pub fn div(&self, t: f64) -> Self{
+    pub fn div(self, t: f64) -> Self{
         Self(self.0 / t, self.1 / t, self.2 / t)
     }
 
-    pub fn dot(&self, other: &Self) -> f64{
+    pub fn dot(self, other: Self) -> f64{
         self.0.mul_add(other.0, self.1.mul_add(other.1, self.2 * other.2))
     }
 
-    pub fn cross(&self, other: &Self) -> Self{
+    pub fn cross(self, other: Self) -> Self{
         Self(
             self.1.mul_add(other.2, -self.2 * other.1),
             self.2.mul_add(other.0, -self.0 * other.2),
@@ -53,11 +53,11 @@ impl Vec3{
         )
     }
 
-    pub fn unit_vector(&self) -> Self{
+    pub fn unit_vector(self) -> Self{
         self.div(self.length())
     }
 
-    pub fn length(&self) -> f64{
+    pub fn length(self) -> f64{
         self.length_squared().sqrt()
     }
 
@@ -136,9 +136,8 @@ impl Mul for Vec3{
     }
 }
 
-pub fn mul(t: f64, v: &Vec3) -> Vec3{
+pub fn mul(t: f64, v: Vec3) -> Vec3{
     Vec3(t * v.0, t * v.1, t * v.2)
 }
 
 pub type Point3 = Vec3;
-pub type Color = Vec3;

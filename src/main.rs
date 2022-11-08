@@ -2,10 +2,11 @@
 #![allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 use std::io::{self, Write};
 
-use crate::vec3::Color;
+use color::Color;
 
 mod vec3;
 mod color;
+mod ray;
 
 fn main() {
     // Image dimensions
