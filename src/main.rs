@@ -23,7 +23,7 @@ fn main() {
             let green = y as f64 / (IMAGE_HEIGHT - 1) as f64;
             let blue = 0.25;
             let color = Color::new(red, green, blue);
-            color::write_color(&color);
+            color::write(color);
         }
     }
     eprintln!("\nDone");
