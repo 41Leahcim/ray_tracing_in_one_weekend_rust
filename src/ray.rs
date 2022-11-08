@@ -2,7 +2,7 @@
 use crate::vec3::{Vec3, Point3, mul};
 
 #[derive(Debug, Default)]
-struct Ray{
+pub struct Ray{
     origin: Point3,
     direction: Vec3
 }
