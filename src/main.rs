@@ -1,3 +1,5 @@
+use std::io::{self, Write};
+
 fn main() {
     // Image dimensions
     const IMAGE_WIDTH: usize = 256;
@@ -6,6 +8,8 @@ fn main() {
     // Render the image
     println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255");
     for y in (0..IMAGE_HEIGHT).rev(){
+        eprint!("\rScanlines remaining: {y}");
+        io::stderr().flush().unwrap();
         for x in 0..IMAGE_WIDTH{
             let red = x as f64 / (IMAGE_WIDTH - 1) as f64;
             let green = y as f64 / (IMAGE_HEIGHT - 1) as f64;
@@ -16,4 +20,5 @@ fn main() {
             println!("{red} {green} {blue}"); 
         }
     }
+    eprintln!("\nDone");
 }
