@@ -1,6 +1,8 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 #![allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+
 use std::io::{self, Write};
+use std::time::Instant;
 
 use color::Color;
 use ray::Ray;
@@ -31,9 +33,11 @@ fn ray_color(r: &Ray) -> Color{
 }
 
 fn main() {
+    let start = Instant::now();
+
     // Image dimensions
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: usize = 400;
+    const IMAGE_WIDTH: usize = 7680;
     const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
 
     // Camera
@@ -48,16 +52,19 @@ fn main() {
 
     // Render the image
     println!("P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255");
-    for y in (0..IMAGE_HEIGHT).rev(){
+    let image = (0..IMAGE_HEIGHT).rev().map(|y|{
         eprint!("\rScanlines remaining: {y}");
         io::stderr().flush().unwrap();
-        for x in 0..IMAGE_WIDTH{
+        (0..IMAGE_WIDTH).map(|x|{
             let u = x as f64 / (IMAGE_WIDTH - 1) as f64;
             let v = y as f64 / (IMAGE_HEIGHT - 1) as f64;
             let r = Ray::new(origin, lower_left_corner + mul(u, horizontal) + mul(v,  vertical) - origin);
             let pixel_color = ray_color(&r);
-            color::write(pixel_color);
-        }
-    }
+            color::parse(pixel_color)
+        }).collect::<String>()
+    }).collect::<String>();
+    println!("{image}");
     eprintln!("\nDone");
+
+    eprintln!("{}", start.elapsed().as_secs_f64());
 }
