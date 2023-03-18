@@ -2,9 +2,13 @@
 #![allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 
 use std::io::{self, Write, BufWriter, stdout};
+use std::sync::Arc;
 use std::time::Instant;
 
 use color::Color;
+use hittable::hittable_list::HittableList;
+use hittable::sphere::Sphere;
+use hittable::{Hittable, HitRecord};
 use ray::Ray;
 use vec3::mul;
 
@@ -13,32 +17,21 @@ use crate::vec3::{Point3, Vec3};
 mod vec3;
 mod color;
 mod ray;
+mod hittable;
+mod rtweekend;
 
 // Image dimensions
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
 const IMAGE_WIDTH: usize = 3840;
 const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
 
-fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64{
-    let oc = r.origin() - center;
-    let a = r.direction().length_squared();
-    let half_b = oc.dot(r.direction());
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-    if discriminant < 0.0{
-        -1.0
-    }else{
-        (-half_b - discriminant.sqrt()) / a
-    }
-}
+fn ray_color(ray: &Ray, world: &impl Hittable) -> Color{
+    let mut record = HitRecord::default();
 
-fn ray_color(r: &Ray) -> Color{
-    let t = hit_sphere(Point3::new(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0{
-        let n = Vec3::unit_vector(r.at(t) - Vec3::new(0.0, 0.0, -1.0));
-        Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0).mul(0.5)
+    if world.hit(ray, 0.0, f64::INFINITY, &mut record){
+        (record.normal + Color::new(1.0, 1.0, 1.0)).mul(0.5)
     }else{
-        let unit_direction = r.direction().unit_vector();
+        let unit_direction = ray.direction().unit_vector();
         let t = 0.5 * (unit_direction.y() + 1.0);
         Color::new(1.0, 1.0, 1.0).mul(1.0 - t) + Color::new(0.5, 0.7, 1.0).mul(t)
     }
@@ -46,6 +39,9 @@ fn ray_color(r: &Ray) -> Color{
 
 fn render_image(origin: Vec3, lower_left_corner: Vec3, horizontal: Vec3, vertical: Vec3){
     let mut out = BufWriter::new(stdout().lock());
+    let mut world = HittableList::default();
+    world.add(Arc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
+    world.add(Arc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
     writeln!(out, "P3\n{IMAGE_WIDTH} {IMAGE_HEIGHT}\n255").unwrap();
     (0..IMAGE_HEIGHT).rev().for_each(|y|{
@@ -54,8 +50,8 @@ fn render_image(origin: Vec3, lower_left_corner: Vec3, horizontal: Vec3, vertica
         (0..IMAGE_WIDTH).for_each(|x|{
             let u = x as f64 / (IMAGE_WIDTH - 1) as f64;
             let v = y as f64 / (IMAGE_HEIGHT - 1) as f64;
-            let r = Ray::new(origin, lower_left_corner + mul(u, horizontal) + mul(v,  vertical) - origin);
-            let pixel_color = ray_color(&r);
+            let ray = Ray::new(origin, lower_left_corner + mul(u, horizontal) + mul(v,  vertical) - origin);
+            let pixel_color = ray_color(&ray, &world);
             color::write(&mut out, pixel_color).unwrap();
         })
     });
