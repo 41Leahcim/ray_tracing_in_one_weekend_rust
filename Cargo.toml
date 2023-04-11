@@ -2,3 +2,7 @@
 name = "ray_tracing_in_one_weekend"
 version = "0.1.0"
 edition = "2021"
+
+[profile.release]
+lto = "fat"
+opt-level = 'z'

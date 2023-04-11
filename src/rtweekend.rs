@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 const PI: f64 = std::f64::consts::PI;
 const INFINITY: f64 = f64::INFINITY;
 
