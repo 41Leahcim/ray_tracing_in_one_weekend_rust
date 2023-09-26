@@ -84,13 +84,13 @@ impl Builder {
         let viewport_u = Vec3::new(viewport_width, 0.0, 0.0);
         let viewport_v = Vec3::new(0.0, -viewport_height, 0.0);
 
-        let pixel_delta_u = viewport_u.div(image_width as f64);
-        let pixel_delta_v = viewport_v.div(image_height as f64);
+        let pixel_delta_u = viewport_u / (image_width as f64);
+        let pixel_delta_v = viewport_v / (image_height as f64);
 
         //  Calculate the location of the upper left pixel
         let viewport_upper_left =
-            center - Vec3::new(0.0, 0.0, focal_length) - viewport_u.div(2.0) - viewport_v.div(2.0);
-        let origin = viewport_upper_left + (pixel_delta_u.mul(0.5) + pixel_delta_v);
+            center - Vec3::new(0.0, 0.0, focal_length) - viewport_u / 2.0 - viewport_v / 2.0;
+        let origin = viewport_upper_left + (pixel_delta_u * 0.5 + pixel_delta_v);
 
         Camera {
             image_width,
@@ -143,18 +143,18 @@ impl Camera {
         let mut record = HitRecord::default();
 
         if world.hit(ray, Interval::new(0.0, f64::INFINITY), &mut record) {
-            (record.normal + Color::new(1.0, 1.0, 1.0)).mul(0.5)
+            record.normal + Color::new(1.0, 1.0, 1.0) * 0.5
         } else {
             let unit_direction = ray.direction().unit_vector();
             let t = 0.5 * (unit_direction.y() + 1.0);
-            Color::new(1.0, 1.0, 1.0).mul(1.0 - t) + Color::new(0.5, 0.7, 1.0).mul(t)
+            Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
         }
     }
 
     /// Gets a randomly sampled camera ray for the pixel at location x,y
     fn get_ray(&self, x: usize, y: usize) -> Ray {
         let pixel_center =
-            self.origin + (self.pixel_delta_u.mul(x as f64)) + (self.pixel_delta_v.mul(y as f64));
+            self.origin + (self.pixel_delta_u * (x as f64)) + (self.pixel_delta_v * (y as f64));
         let pixel_sample = pixel_center + self.pixel_sample_square();
 
         let ray_origin = self.center;
@@ -166,6 +166,6 @@ impl Camera {
     fn pixel_sample_square(&self) -> Vec3 {
         let px = -0.5 + rand::random::<f64>();
         let py = -0.5 + rand::random::<f64>();
-        (self.pixel_delta_u.mul(px)) + (self.pixel_delta_v.mul(py))
+        (self.pixel_delta_u * px) + (self.pixel_delta_v * py)
     }
 }

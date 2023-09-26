@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use crate::vec3::{mul, Point3, Vec3};
+use crate::vec3::{Point3, Vec3};
 
 #[derive(Debug, Default)]
 pub struct Ray {
@@ -21,6 +21,6 @@ impl Ray {
     }
 
     pub fn at(&self, t: f64) -> Point3 {
-        self.origin + mul(t, self.direction)
+        self.origin + t * self.direction
     }
 }

@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 use std::{
     fmt,
-    ops::{Add, AddAssign, Index, IndexMut, Mul, Neg, Sub},
+    ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub},
 };
 
 #[derive(Debug, Default, Clone, Copy)]
@@ -22,26 +22,6 @@ impl Vec3 {
 
     pub const fn z(self) -> f64 {
         self.2
-    }
-
-    pub fn mul_assign(&mut self, t: f64) {
-        self.0 *= t;
-        self.1 *= t;
-        self.2 *= t;
-    }
-
-    pub fn div_assign(&mut self, t: f64) {
-        self.0 /= t;
-        self.1 /= t;
-        self.2 /= t;
-    }
-
-    pub fn mul(self, t: f64) -> Self {
-        Self(t * self.0, t * self.1, t * self.2)
-    }
-
-    pub fn div(self, t: f64) -> Self {
-        Self(self.0 / t, self.1 / t, self.2 / t)
     }
 
     pub fn dot(self, other: Self) -> f64 {
@@ -141,8 +121,44 @@ impl Mul for Vec3 {
     }
 }
 
-pub fn mul(t: f64, v: Vec3) -> Vec3 {
-    Vec3(t * v.0, t * v.1, t * v.2)
+impl Mul<f64> for Vec3 {
+    type Output = Self;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Self::new(self.0 * rhs, self.1 * rhs, self.2 * rhs)
+    }
+}
+
+impl Mul<Vec3> for f64 {
+    type Output = Vec3;
+
+    fn mul(self, rhs: Vec3) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl MulAssign<f64> for Vec3 {
+    fn mul_assign(&mut self, rhs: f64) {
+        self.0 *= rhs;
+        self.1 *= rhs;
+        self.2 *= rhs;
+    }
+}
+
+impl Div<f64> for Vec3 {
+    type Output = Self;
+
+    fn div(self, rhs: f64) -> Self::Output {
+        Self(self.0 / rhs, self.1 / rhs, self.2 / rhs)
+    }
+}
+
+impl DivAssign<f64> for Vec3 {
+    fn div_assign(&mut self, rhs: f64) {
+        self.0 /= rhs;
+        self.1 /= rhs;
+        self.2 /= rhs;
+    }
 }
 
 impl std::iter::Sum for Vec3 {
