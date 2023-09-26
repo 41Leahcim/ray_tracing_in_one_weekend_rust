@@ -1,32 +1,32 @@
-use crate::{vec3::Point3, ray::Ray};
+use crate::{ray::Ray, vec3::Point3};
 
-use super::{Hittable, HitRecord};
+use super::{HitRecord, Hittable};
 
 #[derive(Debug, Default)]
-pub struct Sphere{
+pub struct Sphere {
     center: Point3,
-    radius: f64
+    radius: f64,
 }
 
-impl Hittable for Sphere{
+impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, time_min: f64, time_max: f64, record: &mut HitRecord) -> bool {
         let oc = ray.origin() - self.center;
         let a = ray.direction().length_squared();
         let half_b = oc.dot(ray.direction());
-        let c = oc.length_squared() - self.radius * self.radius;
+        let c = self.radius.mul_add(-self.radius, oc.length_squared());
 
-        let discriminant = half_b * half_b - a * c;
+        let discriminant = half_b.mul_add(half_b, -a * c);
 
-        if discriminant < 0.0{
+        if discriminant < 0.0 {
             return false;
         }
         let sqrtd = discriminant.sqrt();
 
         // Find the nearest root that lies in the acceptable range.
         let mut root = (-half_b - sqrtd) / a;
-        if root < time_min || time_max < root{
+        if root < time_min || time_max < root {
             root = (-half_b + sqrtd) / a;
-            if root < time_min || time_max < root{
+            if root < time_min || time_max < root {
                 return false;
             }
         }
@@ -40,8 +40,8 @@ impl Hittable for Sphere{
     }
 }
 
-impl Sphere{
-    pub fn new(center: Point3, radius: f64) -> Self{
+impl Sphere {
+    pub const fn new(center: Point3, radius: f64) -> Self {
         Self { center, radius }
     }
 }
