@@ -6,3 +6,6 @@ edition = "2021"
 [profile.release]
 lto = "fat"
 opt-level = 'z'
+
+[dependencies]
+rand = "0.8.5"

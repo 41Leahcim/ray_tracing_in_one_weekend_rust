@@ -145,4 +145,14 @@ pub fn mul(t: f64, v: Vec3) -> Vec3 {
     Vec3(t * v.0, t * v.1, t * v.2)
 }
 
+impl std::iter::Sum for Vec3 {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        let mut result = Self::default();
+        for vec3 in iter {
+            result += vec3;
+        }
+        result
+    }
+}
+
 pub type Point3 = Vec3;

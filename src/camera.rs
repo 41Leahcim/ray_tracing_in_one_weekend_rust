@@ -14,6 +14,7 @@ pub struct Builder {
     image_width: Option<usize>,
     image_height: Option<usize>,
     center: Option<Point3>,
+    samples_per_pixel: Option<u32>,
 }
 
 #[allow(dead_code)]
@@ -35,6 +36,11 @@ impl Builder {
 
     pub const fn center(mut self, center: Point3) -> Self {
         self.center = Some(center);
+        self
+    }
+
+    pub const fn samples_per_pixel(mut self, samples: u32) -> Self {
+        self.samples_per_pixel = Some(samples);
         self
     }
 
@@ -93,6 +99,7 @@ impl Builder {
             origin,
             pixel_delta_u,
             pixel_delta_v,
+            samples_per_pixel: self.samples_per_pixel.unwrap_or(10),
         }
     }
 }
@@ -104,6 +111,7 @@ pub struct Camera {
     origin: Point3,
     pixel_delta_u: Vec3,
     pixel_delta_v: Vec3,
+    samples_per_pixel: u32,
 }
 
 impl Camera {
@@ -118,13 +126,13 @@ impl Camera {
         for y in 0..self.image_height {
             eprint!("\rScanlines remaining: {}", self.image_height - y);
             for x in 0..self.image_width {
-                let pixel_center = self.origin
-                    + (self.pixel_delta_u.mul(x as f64))
-                    + (self.pixel_delta_v.mul(y as f64));
-                let ray_direction = pixel_center - self.center;
-                let ray = Ray::new(self.center, ray_direction);
-                let pixel_color = Self::ray_color(&ray, world);
-                color::write(&mut out, pixel_color)
+                let pixel_color = (0..self.samples_per_pixel)
+                    .map(|_| {
+                        let ray = self.get_ray(x, y);
+                        Self::ray_color(&ray, world)
+                    })
+                    .sum();
+                color::write(&mut out, pixel_color, self.samples_per_pixel)
                     .unwrap_or_else(|e| panic!("Failed to write color value.\n{e}"));
             }
         }
@@ -141,5 +149,23 @@ impl Camera {
             let t = 0.5 * (unit_direction.y() + 1.0);
             Color::new(1.0, 1.0, 1.0).mul(1.0 - t) + Color::new(0.5, 0.7, 1.0).mul(t)
         }
+    }
+
+    /// Gets a randomly sampled camera ray for the pixel at location x,y
+    fn get_ray(&self, x: usize, y: usize) -> Ray {
+        let pixel_center =
+            self.origin + (self.pixel_delta_u.mul(x as f64)) + (self.pixel_delta_v.mul(y as f64));
+        let pixel_sample = pixel_center + self.pixel_sample_square();
+
+        let ray_origin = self.center;
+        let ray_direction = pixel_sample - ray_origin;
+        Ray::new(ray_origin, ray_direction)
+    }
+
+    /// Returns a random point in the square surrounding a pixel at the origin
+    fn pixel_sample_square(&self) -> Vec3 {
+        let px = -0.5 + rand::random::<f64>();
+        let py = -0.5 + rand::random::<f64>();
+        (self.pixel_delta_u.mul(px)) + (self.pixel_delta_v.mul(py))
     }
 }

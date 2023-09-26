@@ -24,7 +24,7 @@ mod vec3;
 
 // Image dimensions
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const IMAGE_WIDTH: usize = 3840;
+const IMAGE_WIDTH: usize = 480;
 
 fn main() {
     let start = Instant::now();
@@ -36,6 +36,7 @@ fn main() {
     let mut cam = Camera::builder()
         .aspect_ratio(ASPECT_RATIO)
         .image_width(IMAGE_WIDTH)
+        .samples_per_pixel(100)
         .buid();
 
     cam.render(&world);

@@ -39,4 +39,8 @@ impl Interval {
     pub const fn max(&self) -> f64 {
         self.max
     }
+
+    pub fn clamp(&self, x: f64) -> f64 {
+        x.clamp(self.min, self.max)
+    }
 }
