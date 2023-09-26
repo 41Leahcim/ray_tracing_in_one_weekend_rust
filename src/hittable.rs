@@ -1,6 +1,7 @@
 use std::fmt::Debug;
 
 use crate::{
+    interval::Interval,
     ray::Ray,
     vec3::{Point3, Vec3},
 };
@@ -29,5 +30,5 @@ impl HitRecord {
 }
 
 pub trait Hittable: Debug {
-    fn hit(&self, ray: &Ray, time_min: f64, time_max: f64, record: &mut HitRecord) -> bool;
+    fn hit(&self, ray: &Ray, ray_t: Interval, record: &mut HitRecord) -> bool;
 }

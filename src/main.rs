@@ -13,6 +13,7 @@ use color::Color;
 use hittable::hittable_list::HittableList;
 use hittable::sphere::Sphere;
 use hittable::{HitRecord, Hittable};
+use interval::Interval;
 use ray::Ray;
 use vec3::mul;
 
@@ -20,6 +21,7 @@ use crate::vec3::{Point3, Vec3};
 
 mod color;
 mod hittable;
+mod interval;
 mod ray;
 mod rtweekend;
 mod vec3;
@@ -32,7 +34,7 @@ const IMAGE_HEIGHT: usize = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
 fn ray_color(ray: &Ray, world: &impl Hittable) -> Color {
     let mut record = HitRecord::default();
 
-    if world.hit(ray, 0.0, f64::INFINITY, &mut record) {
+    if world.hit(ray, Interval::new(0.0, f64::INFINITY), &mut record) {
         (record.normal + Color::new(1.0, 1.0, 1.0)).mul(0.5)
     } else {
         let unit_direction = ray.direction().unit_vector();

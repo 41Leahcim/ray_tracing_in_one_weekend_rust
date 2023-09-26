@@ -1,6 +1,8 @@
 #![allow(dead_code)]
 use std::sync::Arc;
 
+use crate::interval::Interval;
+
 use super::{HitRecord, Hittable};
 
 #[derive(Debug, Default)]
@@ -25,20 +27,18 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(
-        &self,
-        ray: &crate::ray::Ray,
-        time_min: f64,
-        time_max: f64,
-        record: &mut super::HitRecord,
-    ) -> bool {
+    fn hit(&self, ray: &crate::ray::Ray, ray_t: Interval, record: &mut super::HitRecord) -> bool {
         let mut temp_record = HitRecord::default();
-        let mut closest_so_far = time_max;
+        let mut closest_so_far = ray_t.max();
 
         self.objects
             .iter()
             .filter(|object| {
-                if object.hit(ray, time_min, closest_so_far, &mut temp_record) {
+                if object.hit(
+                    ray,
+                    Interval::new(ray_t.min(), closest_so_far),
+                    &mut temp_record,
+                ) {
                     closest_so_far = temp_record.time;
                     *record = temp_record;
                     true
