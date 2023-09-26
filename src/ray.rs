@@ -1,26 +1,26 @@
 #![allow(dead_code)]
-use crate::vec3::{Vec3, Point3, mul};
+use crate::vec3::{mul, Point3, Vec3};
 
 #[derive(Debug, Default)]
-pub struct Ray{
+pub struct Ray {
     origin: Point3,
-    direction: Vec3
+    direction: Vec3,
 }
 
-impl Ray{
-    pub const fn new(origin: Point3, direction: Vec3) -> Self{
+impl Ray {
+    pub const fn new(origin: Point3, direction: Vec3) -> Self {
         Self { origin, direction }
     }
 
-    pub const fn origin(&self) -> Point3{
+    pub const fn origin(&self) -> Point3 {
         self.origin
     }
 
-    pub const  fn direction(&self) -> Vec3{
+    pub const fn direction(&self) -> Vec3 {
         self.direction
     }
 
-    pub fn at(&self, t: f64) -> Point3{
+    pub fn at(&self, t: f64) -> Point3 {
         self.origin + mul(t, self.direction)
     }
 }
