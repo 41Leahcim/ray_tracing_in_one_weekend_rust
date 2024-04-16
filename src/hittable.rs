@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use core::fmt::Debug;
 
 use crate::{
     interval::Interval,
@@ -12,13 +12,17 @@ pub mod sphere;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct HitRecord {
-    pub point: Point3,
-    pub normal: Vec3,
+    point: Point3,
+    normal: Vec3,
     time: f64,
     font_face: bool,
 }
 
 impl HitRecord {
+    pub const fn normal(&self) -> &Vec3 {
+        &self.normal
+    }
+
     pub fn set_face_normal(&mut self, ray: &Ray, outward_normal: &Vec3) {
         self.font_face = ray.direction().dot(*outward_normal) < 0.0;
         self.normal = if self.font_face {

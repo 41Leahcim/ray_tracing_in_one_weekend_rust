@@ -1,7 +1,7 @@
 #![allow(dead_code)]
-use std::sync::Arc;
+use alloc::sync::Arc;
 
-use crate::interval::Interval;
+use crate::{interval::Interval, ray::Ray};
 
 use super::{HitRecord, Hittable};
 
@@ -27,7 +27,7 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &crate::ray::Ray, ray_t: Interval, record: &mut super::HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, ray_t: Interval, record: &mut super::HitRecord) -> bool {
         let mut temp_record = HitRecord::default();
         let mut closest_so_far = ray_t.max();
 

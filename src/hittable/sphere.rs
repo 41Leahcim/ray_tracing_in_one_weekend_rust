@@ -11,8 +11,12 @@ pub struct Sphere {
 impl Hittable for Sphere {
     fn hit(&self, ray: &Ray, ray_t: Interval, record: &mut HitRecord) -> bool {
         let oc = ray.origin() - self.center;
+
+        #[allow(clippy::min_ident_chars)]
         let a = ray.direction().length_squared();
         let half_b = oc.dot(ray.direction());
+
+        #[allow(clippy::min_ident_chars)]
         let c = self.radius.mul_add(-self.radius, oc.length_squared());
 
         let discriminant = half_b.mul_add(half_b, -a * c);

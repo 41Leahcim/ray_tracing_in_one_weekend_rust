@@ -1,7 +1,7 @@
 use std::io::{self, BufWriter, Write};
 
 use crate::{
-    color::{self, Color},
+    color::Color,
     hittable::{HitRecord, Hittable},
     interval::Interval,
     ray::Ray,
@@ -48,7 +48,8 @@ impl Builder {
     fn calculate_resolution(&self) -> (f64, usize, usize) {
         match (self.aspect_ratio, self.image_width, self.image_height) {
             (Some(aspect_ratio), Some(image_width), Some(image_height)) => {
-                assert!((image_width as f64 / aspect_ratio - image_height as f64).abs() < 0.001);
+                let expected_height = image_width as f64 / aspect_ratio;
+                assert!((expected_height - image_height as f64).abs() < 0.001, "Invalid height ({image_height}) for width ({image_width}) and aspect ratio ({aspect_ratio}), expected {expected_height}");
                 (aspect_ratio, image_width, image_height)
             }
             (Some(aspect_ratio), Some(image_width), None) => {
@@ -119,7 +120,7 @@ impl Camera {
         Builder::default()
     }
 
-    pub fn render(&mut self, world: &impl Hittable) {
+    pub fn render<Object: Hittable>(&mut self, world: &Object) {
         let mut out = BufWriter::new(io::stdout().lock());
 
         writeln!(out, "P3\n{} {}\n255", self.image_width, self.image_height).unwrap();
@@ -131,23 +132,23 @@ impl Camera {
                         let ray = self.get_ray(x, y);
                         Self::ray_color(&ray, world)
                     })
-                    .sum();
-                color::write(&mut out, pixel_color, self.samples_per_pixel)
-                    .unwrap_or_else(|e| panic!("Failed to write color value.\n{e}"));
+                    .sum::<Color>();
+                writeln!(out, "{}", pixel_color.scale(self.samples_per_pixel))
+                    .unwrap_or_else(|error| panic!("Failed to write color value.\n{error}"));
             }
         }
         eprintln!("\nDone");
     }
 
-    fn ray_color(ray: &Ray, world: &impl Hittable) -> Color {
+    fn ray_color<Object: Hittable>(ray: &Ray, world: &Object) -> Color {
         let mut record = HitRecord::default();
 
         if world.hit(ray, Interval::new(0.0, f64::INFINITY), &mut record) {
-            record.normal + Color::new(1.0, 1.0, 1.0) * 0.5
+            Color::from(*record.normal()) + Color::new(1.0, 1.0, 1.0) * 0.5
         } else {
             let unit_direction = ray.direction().unit_vector();
-            let t = 0.5 * (unit_direction.y() + 1.0);
-            Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
+            let time = 0.5 * (unit_direction.y() + 1.0);
+            Color::new(1.0, 1.0, 1.0) * (1.0 - time) + Color::new(0.5, 0.7, 1.0) * time
         }
     }
 

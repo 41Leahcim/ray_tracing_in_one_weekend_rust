@@ -1,11 +1,24 @@
-#![warn(clippy::nursery, clippy::pedantic, clippy::unwrap_used)]
+#![warn(clippy::nursery, clippy::pedantic, clippy::restriction)]
 #![allow(
     clippy::cast_precision_loss,
     clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
+    clippy::cast_sign_loss,
+    clippy::missing_docs_in_private_items,
+    clippy::blanket_clippy_restriction_lints,
+    clippy::print_stderr,
+    clippy::implicit_return,
+    clippy::arithmetic_side_effects,
+    clippy::default_numeric_fallback,
+    clippy::float_arithmetic,
+    clippy::as_conversions,
+    clippy::single_call_fn,
+    clippy::panic,
+    clippy::self_named_module_files
 )]
 
-use std::sync::Arc;
+extern crate alloc;
+
+use alloc::sync::Arc;
 use std::time::Instant;
 
 use hittable::hittable_list::HittableList;

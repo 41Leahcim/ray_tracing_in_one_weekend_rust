@@ -1,6 +1,7 @@
 #![allow(dead_code)]
-use std::{
-    fmt,
+use core::{
+    fmt::{self, Formatter},
+    iter,
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub},
 };
 
@@ -92,8 +93,8 @@ impl AddAssign for Vec3 {
 }
 
 impl fmt::Display for Vec3 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{} {} {}", self.0, self.1, self.2)
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
+        write!(formatter, "{} {} {}", self.0, self.1, self.2)
     }
 }
 
@@ -161,7 +162,7 @@ impl DivAssign<f64> for Vec3 {
     }
 }
 
-impl std::iter::Sum for Vec3 {
+impl iter::Sum for Vec3 {
     fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
         let mut result = Self::default();
         for vec3 in iter {
