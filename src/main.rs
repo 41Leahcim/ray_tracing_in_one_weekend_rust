@@ -13,7 +13,8 @@
     clippy::as_conversions,
     clippy::single_call_fn,
     clippy::panic,
-    clippy::self_named_module_files
+    clippy::self_named_module_files,
+    clippy::expect_used
 )]
 
 extern crate alloc;
@@ -37,7 +38,7 @@ mod vec3;
 
 // Image dimensions
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const IMAGE_WIDTH: usize = 480;
+const IMAGE_WIDTH: usize = 1920;
 
 fn main() {
     let start = Instant::now();
@@ -46,7 +47,7 @@ fn main() {
     world.add(Arc::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)));
     world.add(Arc::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)));
 
-    let mut cam = Camera::builder()
+    let cam = Camera::builder()
         .aspect_ratio(ASPECT_RATIO)
         .image_width(IMAGE_WIDTH)
         .samples_per_pixel(100)

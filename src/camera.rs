@@ -1,4 +1,4 @@
-use std::io::{self, BufWriter, Write};
+use image::ImageBuffer;
 
 use crate::{
     color::Color,
@@ -120,24 +120,18 @@ impl Camera {
         Builder::default()
     }
 
-    pub fn render<Object: Hittable>(&mut self, world: &Object) {
-        let mut out = BufWriter::new(io::stdout().lock());
-
-        writeln!(out, "P3\n{} {}\n255", self.image_width, self.image_height).unwrap();
-        for y in 0..self.image_height {
-            eprint!("\rScanlines remaining: {}", self.image_height - y);
-            for x in 0..self.image_width {
-                let pixel_color = (0..self.samples_per_pixel)
-                    .map(|_| {
-                        let ray = self.get_ray(x, y);
-                        Self::ray_color(&ray, world)
-                    })
-                    .sum::<Color>();
-                writeln!(out, "{}", pixel_color.scale(self.samples_per_pixel))
-                    .unwrap_or_else(|error| panic!("Failed to write color value.\n{error}"));
-            }
-        }
-        eprintln!("\nDone");
+    pub fn render<Object: Hittable>(&self, world: &Object) {
+        ImageBuffer::from_fn(self.image_width as u32, self.image_height as u32, |x, y| {
+            let pixel_color = (0..self.samples_per_pixel)
+                .map(|_| {
+                    let ray = self.get_ray(x as usize, y as usize);
+                    Self::ray_color(&ray, world)
+                })
+                .sum::<Color>();
+            image::Rgb::from(pixel_color.scale(self.samples_per_pixel))
+        })
+        .save("image.jpg")
+        .expect("Failed to save image");
     }
 
     fn ray_color<Object: Hittable>(ray: &Ray, world: &Object) -> Color {

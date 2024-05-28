@@ -1,7 +1,9 @@
 use core::{
-    fmt, iter,
+    iter,
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub},
 };
+
+use image::Rgb;
 
 use crate::{interval::Interval, vec3::Vec3};
 
@@ -35,18 +37,6 @@ impl Color {
     }
 }
 
-impl fmt::Display for Color {
-    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            formatter,
-            "{} {} {}",
-            self.red() as u8,
-            self.green() as u8,
-            self.blue() as u8
-        )
-    }
-}
-
 impl From<Vec3> for Color {
     fn from(value: Vec3) -> Self {
         Self(value)
@@ -56,6 +46,12 @@ impl From<Vec3> for Color {
 impl From<Color> for Vec3 {
     fn from(value: Color) -> Self {
         value.0
+    }
+}
+
+impl From<Color> for Rgb<u8> {
+    fn from(value: Color) -> Self {
+        Self([value.0.x() as u8, value.0.y() as u8, value.0.z() as u8])
     }
 }
 

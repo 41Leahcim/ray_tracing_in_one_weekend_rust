@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 use core::{
-    fmt::{self, Formatter},
     iter,
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub},
 };
@@ -89,12 +88,6 @@ impl AddAssign for Vec3 {
         self.0 += rhs.0;
         self.1 += rhs.1;
         self.2 += rhs.2;
-    }
-}
-
-impl fmt::Display for Vec3 {
-    fn fmt(&self, formatter: &mut Formatter<'_>) -> fmt::Result {
-        write!(formatter, "{} {} {}", self.0, self.1, self.2)
     }
 }
 
