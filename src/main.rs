@@ -7,18 +7,24 @@ use vec3::{Color, Point3, Vec3};
 pub mod ray;
 pub mod vec3;
 
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
     let origin_center = *center - *ray.origin();
     let a = ray.direction().dot(ray.direction());
     let b = ray.direction().dot(&origin_center) * -2.0;
     let c = origin_center.dot(&origin_center) - radius * radius;
     let discriminant = b * b - 4.0 * a * c;
-    discriminant >= 0.0
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-b - discriminant.sqrt()) / (2.0 * a)
+    }
 }
 
 fn ray_color(ray: &Ray) -> Color {
-    if hit_sphere(&Point3::new([0.0, 0.0, -1.0]), 0.5, ray) {
-        return Color::new([1.0, 0.0, 0.0]);
+    let time = hit_sphere(&Point3::new([0.0, 0.0, -1.0]), 0.5, ray);
+    if time > 0.0 {
+        let n = (ray.at(time) - Vec3::new([0.0, 0.0, -1.0])).unit_vector();
+        return 0.5 * Color::new([n.x() + 1.0, n.y() + 1.0, n.z() + 1.0]);
     }
     let unit_direction = ray.direction().unit_vector();
     let a = 0.5 * (unit_direction.y() + 1.0);
