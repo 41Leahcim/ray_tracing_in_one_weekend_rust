@@ -5,14 +5,8 @@ use std::{
 
 use image::Rgb;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Vec3([f64; 3]);
-
-impl Default for Vec3 {
-    fn default() -> Self {
-        Self([0.0; 3])
-    }
-}
 
 impl Vec3 {
     pub const fn new(elements: [f64; 3]) -> Self {
