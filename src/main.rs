@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use image::{ImageBuffer, Rgb};
 use ray::Ray;
 use vec3::{Color, Point3, Vec3};
@@ -5,16 +7,30 @@ use vec3::{Color, Point3, Vec3};
 pub mod ray;
 pub mod vec3;
 
+fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> bool {
+    let origin_center = *center - *ray.origin();
+    let a = ray.direction().dot(ray.direction());
+    let b = ray.direction().dot(&origin_center) * -2.0;
+    let c = origin_center.dot(&origin_center) - radius * radius;
+    let discriminant = b * b - 4.0 * a * c;
+    discriminant >= 0.0
+}
+
 fn ray_color(ray: &Ray) -> Color {
+    if hit_sphere(&Point3::new([0.0, 0.0, -1.0]), 0.5, ray) {
+        return Color::new([1.0, 0.0, 0.0]);
+    }
     let unit_direction = ray.direction().unit_vector();
     let a = 0.5 * (unit_direction.y() + 1.0);
     (1.0 - a) * Color::new([1.0; 3]) + a * Color::new([0.5, 0.7, 1.0])
 }
 
 fn main() {
+    let start = Instant::now();
+
     // Image dimensions
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u32 = 400;
+    const IMAGE_WIDTH: u32 = 8640;
 
     // Calculate the image height and ensure the image height is at least 1
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO).max(1.0) as u32;
@@ -49,7 +65,9 @@ fn main() {
         let pixel_color = ray_color(&ray);
         Rgb::from(pixel_color)
     })
-    .save("image.ppm")
+    .save("image.png")
     .unwrap();
     eprintln!("\rDone.                 ");
+
+    println!("{:?}", start.elapsed());
 }
