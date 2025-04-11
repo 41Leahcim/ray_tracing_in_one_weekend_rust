@@ -1,30 +1,17 @@
 use std::time::Instant;
 
+use hittable::{Hittable, list::HittableList, sphere::Sphere};
 use image::{ImageBuffer, Rgb};
 use ray::Ray;
 use vec3::{Color, Point3, Vec3};
 
+pub mod hittable;
 pub mod ray;
 pub mod vec3;
 
-fn hit_sphere(center: &Point3, radius: f64, ray: &Ray) -> f64 {
-    let origin_center = *center - *ray.origin();
-    let a = ray.direction().length_squared();
-    let h = ray.direction().dot(&origin_center);
-    let c = origin_center.length_squared() - radius * radius;
-    let discriminant = h * h - a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (h - discriminant.sqrt()) / a
-    }
-}
-
-fn ray_color(ray: &Ray) -> Color {
-    let time = hit_sphere(&Point3::new([0.0, 0.0, -1.0]), 0.5, ray);
-    if time > 0.0 {
-        let n = (ray.at(time) - Vec3::new([0.0, 0.0, -1.0])).unit_vector();
-        return 0.5 * Color::new([n.x() + 1.0, n.y() + 1.0, n.z() + 1.0]);
+fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
+    if let Some(record) = world.hit(ray, 0.0, f64::INFINITY) {
+        return 0.5 * (record.normal() + Color::new([1.0; 3]));
     }
     let unit_direction = ray.direction().unit_vector();
     let a = 0.5 * (unit_direction.y() + 1.0);
@@ -36,10 +23,16 @@ fn main() {
 
     // Image dimensions
     const ASPECT_RATIO: f64 = 16.0 / 9.0;
-    const IMAGE_WIDTH: u32 = 8640;
+    const IMAGE_WIDTH: u32 = 4320;
 
     // Calculate the image height and ensure the image height is at least 1
     const IMAGE_HEIGHT: u32 = (IMAGE_WIDTH as f64 / ASPECT_RATIO).max(1.0) as u32;
+
+    // World
+    let world = HittableList::new(vec![
+        Box::new(Sphere::new(Point3::new([0.0, 0.0, -1.0]), 0.5)),
+        Box::new(Sphere::new(Point3::new([0.0, -100.5, -1.0]), 100.0)),
+    ]);
 
     // Camera properties
     // Viewport widths less than one are ok since they are real valued.
@@ -68,7 +61,7 @@ fn main() {
             pixel_origin_location + f64::from(x) * pixel_delta_u + f64::from(y) * pixel_delta_v;
         let ray_direction = pixel_center - CAMERA_CENTER;
         let ray = Ray::new(CAMERA_CENTER, ray_direction);
-        let pixel_color = ray_color(&ray);
+        let pixel_color = ray_color(&ray, &world);
         Rgb::from(pixel_color)
     })
     .save("image.png")
