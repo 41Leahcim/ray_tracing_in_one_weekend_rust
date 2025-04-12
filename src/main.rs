@@ -2,15 +2,17 @@ use std::time::Instant;
 
 use hittable::{Hittable, list::HittableList, sphere::Sphere};
 use image::{ImageBuffer, Rgb};
+use interval::Interval;
 use ray::Ray;
 use vec3::{Color, Point3, Vec3};
 
 pub mod hittable;
+pub mod interval;
 pub mod ray;
 pub mod vec3;
 
 fn ray_color(ray: &Ray, world: &dyn Hittable) -> Color {
-    if let Some(record) = world.hit(ray, 0.0, f64::INFINITY) {
+    if let Some(record) = world.hit(ray, Interval::new(0.0, f64::INFINITY)) {
         return 0.5 * (record.normal() + Color::new([1.0; 3]));
     }
     let unit_direction = ray.direction().unit_vector();
