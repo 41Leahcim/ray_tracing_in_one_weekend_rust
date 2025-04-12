@@ -19,7 +19,7 @@ fn main() {
         Box::new(Sphere::new(Point3::new([0.0, -100.5, -1.0]), 100.0)),
     ]);
 
-    let camera = Camera::new(16.0 / 9.0, 1080, 100);
+    let camera = Camera::new(16.0 / 9.0, 540, 100, 50);
     camera.render(&world);
 
     println!("{:?}", start.elapsed());
