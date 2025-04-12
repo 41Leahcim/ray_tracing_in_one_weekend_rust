@@ -11,6 +11,7 @@ use crate::{
 };
 
 pub struct Camera {
+    #[expect(dead_code)]
     /// Ratio of image width over height
     aspect_ratio: f64,
 

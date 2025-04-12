@@ -11,6 +11,7 @@ pub struct HitRecord {
     point: Point3,
     normal: Vec3,
     time: f64,
+    #[expect(dead_code)]
     front_face: bool,
 }
 
