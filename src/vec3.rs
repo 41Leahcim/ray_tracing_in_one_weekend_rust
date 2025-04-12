@@ -1,5 +1,6 @@
 use std::{
     fmt::Display,
+    iter::Sum,
     ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign},
 };
 
@@ -163,6 +164,12 @@ impl Div<f64> for Vec3 {
     fn div(mut self, rhs: f64) -> Self::Output {
         self.0.iter_mut().for_each(|value| *value /= rhs);
         self
+    }
+}
+
+impl Sum for Vec3 {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.fold(Color::default(), |result, value| result + value)
     }
 }
 

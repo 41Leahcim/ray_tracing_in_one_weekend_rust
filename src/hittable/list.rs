@@ -4,11 +4,11 @@ use super::{HitRecord, Hittable};
 
 #[derive(Default)]
 pub struct HittableList {
-    objects: Vec<Box<dyn Hittable>>,
+    objects: Vec<Box<dyn Hittable + Sync>>,
 }
 
 impl HittableList {
-    pub const fn new(objects: Vec<Box<dyn Hittable>>) -> Self {
+    pub const fn new(objects: Vec<Box<dyn Hittable + Sync>>) -> Self {
         Self { objects }
     }
 
@@ -16,7 +16,7 @@ impl HittableList {
         self.objects.clear();
     }
 
-    pub fn add(&mut self, object: Box<dyn Hittable>) {
+    pub fn add(&mut self, object: Box<dyn Hittable + Sync>) {
         self.objects.push(object);
     }
 }

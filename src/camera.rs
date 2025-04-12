@@ -1,4 +1,7 @@
+use std::sync::atomic::{AtomicU32, Ordering};
+
 use image::{ImageBuffer, Rgb};
+use rand::random_range;
 
 use crate::{
     hittable::Hittable,
@@ -28,10 +31,16 @@ pub struct Camera {
 
     /// Offset to pixel below
     pixel_delta_v: Vec3,
+
+    /// Count of random samples for each pixel
+    samples_per_pixel: u16,
+
+    /// Color scale factor for a sum of pixel samples
+    pixel_samples_scale: f64,
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32) -> Self {
+    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u16) -> Self {
         // Calculate the image height and ensure the image height is at least 1
         let image_height = (image_width as f64 / aspect_ratio).max(1.0) as u32;
 
@@ -61,6 +70,8 @@ impl Camera {
             pixel_origin_location,
             pixel_delta_u,
             pixel_delta_v,
+            samples_per_pixel,
+            pixel_samples_scale: 1.0 / samples_per_pixel as f64,
         }
     }
 
@@ -73,17 +84,40 @@ impl Camera {
         (1.0 - a) * Color::new([1.0; 3]) + a * Color::new([0.5, 0.7, 1.0])
     }
 
-    pub fn render(&self, world: &dyn Hittable) {
-        ImageBuffer::from_fn(self.image_width, self.image_height, |x, y| {
-            if x == 0 {
-                eprint!("\rScanlines remaining: {} ", self.image_height - y);
+    /// Returns the vector to a random point in the [-.5, -.5] - [+5, +5] unit square.
+    fn sample_square() -> Vec3 {
+        Vec3::new([random_range(-0.5..=0.5), random_range(-0.5..=0.5), 0.0])
+    }
+
+    /// Construct a camera ray originating from the origin and directed at randomly sampled points
+    /// around the pixel location x, y.
+    fn get_ray(&self, x: u32, y: u32) -> Ray {
+        let offset = Self::sample_square();
+        let pixel_sample = self.pixel_origin_location
+            + (f64::from(x) + offset.x()) * self.pixel_delta_u
+            + (f64::from(y) + offset.y()) * self.pixel_delta_v;
+        let ray_origin = self.center;
+        let ray_direction = pixel_sample - ray_origin;
+        Ray::new(ray_origin, ray_direction)
+    }
+
+    pub fn render(&self, world: &(dyn Hittable + Sync)) {
+        let pixel_count = AtomicU32::new(0);
+        ImageBuffer::from_par_fn(self.image_width, self.image_height, |x, y| {
+            let generated_pixels = pixel_count.fetch_add(1, Ordering::Relaxed);
+            if generated_pixels % self.image_width == 0 {
+                eprint!(
+                    "\rScanlines remaining: {} ",
+                    self.image_height - (generated_pixels / self.image_width)
+                );
             }
-            let pixel_center = self.pixel_origin_location
-                + f64::from(x) * self.pixel_delta_u
-                + f64::from(y) * self.pixel_delta_v;
-            let ray_direction = pixel_center - self.center;
-            let ray = Ray::new(self.center, ray_direction);
-            let pixel_color = Self::ray_color(&ray, world);
+            let pixel_color = (0..self.samples_per_pixel)
+                .map(|_| {
+                    let ray = self.get_ray(x, y);
+                    Self::ray_color(&ray, world)
+                })
+                .sum::<Color>()
+                * self.pixel_samples_scale;
             Rgb::from(pixel_color)
         })
         .save("image.png")
