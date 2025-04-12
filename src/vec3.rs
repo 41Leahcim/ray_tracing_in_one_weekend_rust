@@ -1,10 +1,14 @@
 use std::{
+    array,
     fmt::Display,
     iter::Sum,
-    ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign},
+    ops::{
+        Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, Sub, SubAssign,
+    },
 };
 
 use image::Rgb;
+use rand::{random, random_range};
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Vec3([f64; 3]);
@@ -52,6 +56,33 @@ impl Vec3 {
 
     pub fn unit_vector(self) -> Self {
         self / self.length()
+    }
+
+    pub fn random() -> Self {
+        Self(array::from_fn(|_| random()))
+    }
+
+    pub fn random_range(range: Range<f64>) -> Self {
+        Self(array::from_fn(|_| random_range(range.clone())))
+    }
+
+    pub fn random_unit_vector() -> Self {
+        loop {
+            let point = Self::random_range(-1.0..1.0);
+            let length_squared = point.length_squared();
+            if 1e-160 < length_squared && length_squared <= 1.0 {
+                return point / length_squared.sqrt();
+            }
+        }
+    }
+
+    pub fn random_on_hemisphere(&self) -> Self {
+        let on_unit_sphere = Self::random_unit_vector();
+        if self.dot(&on_unit_sphere) > 0.0 {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
     }
 }
 
