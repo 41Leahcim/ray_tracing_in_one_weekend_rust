@@ -180,9 +180,10 @@ pub type Color = Vec3;
 impl From<Color> for Rgb<u8> {
     fn from(value: Color) -> Self {
         // Translate the [0, 1) component values to the byte range [0, 255]
-        let red = (255.999 * value.x()) as u8;
-        let green = (255.999 * value.y()) as u8;
-        let blue = (255.999 * value.z()) as u8;
+        const MAXIMUM: f64 = 0.999;
+        let red = (256.0 * value.x().clamp(0.0, MAXIMUM)) as u8;
+        let green = (256.0 * value.y().clamp(0.0, MAXIMUM)) as u8;
+        let blue = (256.0 * value.z().clamp(0.0, MAXIMUM)) as u8;
         Self([red, green, blue])
     }
 }
