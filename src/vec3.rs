@@ -84,6 +84,14 @@ impl Vec3 {
             -on_unit_sphere
         }
     }
+
+    pub fn near_zero(&self) -> bool {
+        self.0.iter().all(|&value| value < 1e-8)
+    }
+
+    pub fn reflect(self, n: &Self) -> Self {
+        self - 2.0 * self.dot(n) * *n
+    }
 }
 
 impl Neg for Vec3 {
