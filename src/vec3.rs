@@ -215,13 +215,21 @@ pub type Point3 = Vec3;
 
 pub type Color = Vec3;
 
+fn linear_to_gamma(linear_component: f64) -> f64 {
+    if linear_component > 0.0 {
+        linear_component.sqrt()
+    } else {
+        0.0
+    }
+}
+
 impl From<Color> for Rgb<u8> {
     fn from(value: Color) -> Self {
         // Translate the [0, 1) component values to the byte range [0, 255]
         const MAXIMUM: f64 = 0.999;
-        let red = (256.0 * value.x().clamp(0.0, MAXIMUM)) as u8;
-        let green = (256.0 * value.y().clamp(0.0, MAXIMUM)) as u8;
-        let blue = (256.0 * value.z().clamp(0.0, MAXIMUM)) as u8;
+        let red = (256.0 * linear_to_gamma(value.x()).clamp(0.0, MAXIMUM)) as u8;
+        let green = (256.0 * linear_to_gamma(value.y()).clamp(0.0, MAXIMUM)) as u8;
+        let blue = (256.0 * linear_to_gamma(value.z()).clamp(0.0, MAXIMUM)) as u8;
         Self([red, green, blue])
     }
 }
