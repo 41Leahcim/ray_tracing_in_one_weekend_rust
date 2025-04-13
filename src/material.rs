@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use crate::{hittable::HitRecord, ray::Ray, vec3::Color};
 
+pub mod dielectric;
 pub mod lambertian;
 pub mod metal;
 

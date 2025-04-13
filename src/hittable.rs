@@ -15,7 +15,6 @@ pub struct HitRecord {
     normal: Vec3,
     material: Arc<dyn Material>,
     time: f64,
-    #[expect(dead_code)]
     front_face: bool,
 }
 
@@ -56,6 +55,10 @@ impl HitRecord {
 
     pub fn material(&self) -> &dyn Material {
         self.material.as_ref()
+    }
+
+    pub const fn front_face(&self) -> bool {
+        self.front_face
     }
 }
 
