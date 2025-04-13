@@ -22,8 +22,14 @@ impl Material for Dielectric {
             self.refraction_index
         };
         let unit_direction = ray_in.direction().unit_vector();
-        let refracted = unit_direction.refract(&record.normal(), refraction_index);
-        let scattered = Ray::new(record.point(), refracted);
+        let cos_theta = record.normal().dot(&-unit_direction).min(1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+        let direction = if refraction_index * sin_theta > 1.0 {
+            unit_direction.reflect(&record.normal())
+        } else {
+            unit_direction.refract(&record.normal(), refraction_index)
+        };
+        let scattered = Ray::new(record.point(), direction);
         Some((attenuation, scattered))
     }
 }
