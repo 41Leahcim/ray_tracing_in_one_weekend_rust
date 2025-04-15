@@ -86,7 +86,7 @@ impl Vec3 {
     }
 
     pub fn near_zero(&self) -> bool {
-        self.0.iter().all(|&value| value < 1e-8)
+        self.0.iter().all(|&value| value.abs() < 1e-8)
     }
 
     pub fn reflect(self, n: &Self) -> Self {

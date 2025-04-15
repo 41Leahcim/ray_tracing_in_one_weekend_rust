@@ -41,30 +41,42 @@ pub struct Camera {
 
     /// Maximum number of ray bounces into scene
     max_depth: u8,
+
+    #[expect(dead_code)]
+    /// Vertical view angle (field of view)
+    vertical_field_of_view: f64,
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: u32, samples_per_pixel: u16, max_depth: u8) -> Self {
+    pub fn new(
+        aspect_ratio: f64,
+        image_width: u32,
+        samples_per_pixel: u16,
+        max_depth: u8,
+        vertical_field_of_view: f64,
+    ) -> Self {
         // Calculate the image height and ensure the image height is at least 1
         let image_height = (image_width as f64 / aspect_ratio).max(1.0) as u32;
 
         // Camera properties
         // Viewport widths less than one are ok since they are real valued.
         const FOCAL_LENGTH: f64 = 1.0;
-        const VIEWPORT_HEIGHT: f64 = 2.0;
-        let viewport_width = VIEWPORT_HEIGHT * (image_width as f64 / image_height as f64);
+        let theta = vertical_field_of_view.to_radians();
+        let h = (theta / 2.0).tan();
+        let viewport_height = 2.0 * h * FOCAL_LENGTH;
+        let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
         const CENTER: Point3 = Point3::new([0.0, 0.0, 0.0]);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
         let viewport_u: Vec3 = Vec3::new([viewport_width, 0.0, 0.0]);
-        const VIEWPORT_V: Vec3 = Vec3::new([0.0, -VIEWPORT_HEIGHT, 0.0]);
+        let viewport_v: Vec3 = Vec3::new([0.0, -viewport_height, 0.0]);
 
         let pixel_delta_u = viewport_u / image_width as f64;
-        let pixel_delta_v = VIEWPORT_V / image_height as f64;
+        let pixel_delta_v = viewport_v / image_height as f64;
 
         // Calculate the location of the upper left pixel
         let viewport_upper_left =
-            CENTER - Vec3::new([0.0, 0.0, FOCAL_LENGTH]) - viewport_u / 2.0 - VIEWPORT_V / 2.0;
+            CENTER - Vec3::new([0.0, 0.0, FOCAL_LENGTH]) - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel_origin_location = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
         Self {
             aspect_ratio,
@@ -77,6 +89,7 @@ impl Camera {
             samples_per_pixel,
             pixel_samples_scale: 1.0 / samples_per_pixel as f64,
             max_depth,
+            vertical_field_of_view,
         }
     }
 
