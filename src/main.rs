@@ -1,10 +1,9 @@
-use core::f64;
 use std::{sync::Arc, time::Instant};
 
 use camera::Camera;
 use hittable::{list::HittableList, sphere::Sphere};
-use material::lambertian::Lambertian;
-use vec3::{Color, Point3};
+use material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal};
+use vec3::{Color, Point3, Vec3};
 
 pub mod camera;
 pub mod hittable;
@@ -17,7 +16,7 @@ fn main() {
     let start = Instant::now();
 
     // World
-    /*let material_ground = Arc::new(Lambertian::new(Color::new([0.8, 0.8, 0.0])));
+    let material_ground = Arc::new(Lambertian::new(Color::new([0.8, 0.8, 0.0])));
     let material_center = Arc::new(Lambertian::new(Color::new([0.1, 0.2, 0.5])));
     let material_left = Arc::new(Dielectric::new(1.5));
     let material_bubble = Arc::new(Dielectric::new(1.0 / 1.5));
@@ -49,17 +48,18 @@ fn main() {
             0.5,
             material_right,
         )),
-    ]);*/
-    let material_left = Arc::new(Lambertian::new(Color::new([0.0, 0.0, 1.0])));
-    let material_right = Arc::new(Lambertian::new(Color::new([1.0, 0.0, 0.0])));
-
-    let r = (f64::consts::PI / 4.0).cos();
-    let world = HittableList::new(vec![
-        Box::new(Sphere::new(Point3::new([-r, 0.0, -1.0]), r, material_left)),
-        Box::new(Sphere::new(Point3::new([r, 0.0, -1.0]), r, material_right)),
     ]);
 
-    let camera = Camera::new(16.0 / 9.0, 540, 100, 50, 90.0);
+    let camera = Camera::new(
+        16.0 / 9.0,
+        540,
+        100,
+        50,
+        20.0,
+        Vec3::new([-2.0, 2.0, 1.0]),
+        Point3::new([0.0, 0.0, -1.0]),
+        Vec3::new([0.0, 1.0, 0.0]),
+    );
     camera.render(&world);
 
     println!("{:?}", start.elapsed());

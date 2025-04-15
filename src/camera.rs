@@ -45,44 +45,76 @@ pub struct Camera {
     #[expect(dead_code)]
     /// Vertical view angle (field of view)
     vertical_field_of_view: f64,
+
+    /// Point camera is looking from
+    #[expect(dead_code)]
+    look_from: Point3,
+
+    /// Point camera is looking at
+    #[expect(dead_code)]
+    look_at: Point3,
+
+    /// Camera-relative "up" direction
+    #[expect(dead_code)]
+    v_up: Vec3,
+
+    /// Camera frame basis u (horizontal)
+    #[expect(dead_code)]
+    u: Vec3,
+
+    /// Camera frame basis v (vertical)
+    #[expect(dead_code)]
+    v: Vec3,
+
+    /// Camera frame basis w (depth)
+    #[expect(dead_code)]
+    w: Vec3,
 }
 
 impl Camera {
+    #[expect(clippy::too_many_arguments)]
     pub fn new(
         aspect_ratio: f64,
         image_width: u32,
         samples_per_pixel: u16,
         max_depth: u8,
         vertical_field_of_view: f64,
+        look_from: Point3,
+        look_at: Point3,
+        v_up: Vec3,
     ) -> Self {
         // Calculate the image height and ensure the image height is at least 1
         let image_height = (image_width as f64 / aspect_ratio).max(1.0) as u32;
 
         // Camera properties
         // Viewport widths less than one are ok since they are real valued.
-        const FOCAL_LENGTH: f64 = 1.0;
+        let focal_length = (look_from - look_at).length();
         let theta = vertical_field_of_view.to_radians();
         let h = (theta / 2.0).tan();
-        let viewport_height = 2.0 * h * FOCAL_LENGTH;
+        let viewport_height = 2.0 * h * focal_length;
         let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
-        const CENTER: Point3 = Point3::new([0.0, 0.0, 0.0]);
+        let center = look_from;
+
+        // Calculate the u, v, w unit basis vectors for the camera coordinate frame
+        let w = (look_from - look_at).unit_vector();
+        let u = v_up.cross(&w).unit_vector();
+        let v = w.cross(&u);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges.
-        let viewport_u: Vec3 = Vec3::new([viewport_width, 0.0, 0.0]);
-        let viewport_v: Vec3 = Vec3::new([0.0, -viewport_height, 0.0]);
+        let viewport_u = viewport_width * u;
+        let viewport_v = viewport_height * -v;
 
         let pixel_delta_u = viewport_u / image_width as f64;
         let pixel_delta_v = viewport_v / image_height as f64;
 
         // Calculate the location of the upper left pixel
-        let viewport_upper_left =
-            CENTER - Vec3::new([0.0, 0.0, FOCAL_LENGTH]) - viewport_u / 2.0 - viewport_v / 2.0;
+        let viewport_upper_left = center - focal_length * w - viewport_u / 2.0 - viewport_v / 2.0;
         let pixel_origin_location = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
         Self {
             aspect_ratio,
             image_width,
             image_height,
-            center: CENTER,
+            center,
             pixel_origin_location,
             pixel_delta_u,
             pixel_delta_v,
@@ -90,6 +122,12 @@ impl Camera {
             pixel_samples_scale: 1.0 / samples_per_pixel as f64,
             max_depth,
             vertical_field_of_view,
+            look_from,
+            look_at,
+            v_up,
+            u,
+            v,
+            w,
         }
     }
 
