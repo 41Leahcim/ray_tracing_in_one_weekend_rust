@@ -99,6 +99,15 @@ impl Vec3 {
         let ray_out_parallel = -(1.0 - ray_out_perp.length_squared()).sqrt() * *n;
         ray_out_perp + ray_out_parallel
     }
+
+    pub fn random_in_unit_disk() -> Vec3 {
+        loop {
+            let point = Vec3::new([random_range(-1.0..1.0), random_range(-1.0..1.0), 0.0]);
+            if point.length_squared() < 1.0 {
+                return point;
+            }
+        }
+    }
 }
 
 impl Neg for Vec3 {
