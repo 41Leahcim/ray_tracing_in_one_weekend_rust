@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicU32, Ordering};
 
-use image::{ImageBuffer, Rgb};
+use image::{ImageBuffer, ImageResult, Rgb};
 use rand::random_range;
 
 use crate::{
@@ -152,7 +152,9 @@ impl Camera {
         Ray::new(ray_origin, ray_direction)
     }
 
-    pub fn render(&self, world: &(dyn Hittable + Sync)) {
+    /// # Errors
+    /// Returns an error if the image couldn't be saved to a file.
+    pub fn render(&self, world: &(dyn Hittable + Sync)) -> ImageResult<()> {
         let pixel_count = AtomicU32::new(0);
         ImageBuffer::from_par_fn(self.image_width, self.image_height, |x, y| {
             let generated_pixels = pixel_count.fetch_add(1, Ordering::Relaxed);
@@ -171,8 +173,8 @@ impl Camera {
                 * self.pixel_samples_scale;
             Rgb::from(pixel_color)
         })
-        .save("image.png")
-        .unwrap();
+        .save("image.png")?;
         eprintln!("\rDone.                 ");
+        Ok(())
     }
 }

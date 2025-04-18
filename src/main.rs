@@ -81,7 +81,7 @@ fn main() {
         0.6,
         10.0,
     );
-    camera.render(&world);
+    camera.render(&world).unwrap();
 
     println!("{:?}", start.elapsed());
 }
