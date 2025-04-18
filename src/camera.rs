@@ -11,10 +11,6 @@ use crate::{
 };
 
 pub struct Camera {
-    #[expect(dead_code)]
-    /// Ratio of image width over height
-    aspect_ratio: f64,
-
     /// Rendered image width in pixel count
     image_width: u32,
 
@@ -42,40 +38,8 @@ pub struct Camera {
     /// Maximum number of ray bounces into scene
     max_depth: u8,
 
-    #[expect(dead_code)]
-    /// Vertical view angle (field of view)
-    vertical_field_of_view: f64,
-
-    /// Point camera is looking from
-    #[expect(dead_code)]
-    look_from: Point3,
-
-    /// Point camera is looking at
-    #[expect(dead_code)]
-    look_at: Point3,
-
-    /// Camera-relative "up" direction
-    #[expect(dead_code)]
-    v_up: Vec3,
-
-    /// Camera frame basis u (horizontal)
-    #[expect(dead_code)]
-    u: Vec3,
-
-    /// Camera frame basis v (vertical)
-    #[expect(dead_code)]
-    v: Vec3,
-
-    /// Camera frame basis w (depth)
-    #[expect(dead_code)]
-    w: Vec3,
-
     /// Variation angle of rays through each pixel
     defocus_angle: f64,
-
-    /// Distance from camera lookfrom point to plane of perfect focus
-    #[expect(dead_code)]
-    focus_dist: f64,
 
     /// Defocus disk horizontal radius
     defocus_disk_u: Vec3,
@@ -132,7 +96,6 @@ impl Camera {
         let defocus_disk_u = u * defocus_radius;
         let defocus_disk_v = v * defocus_radius;
         Self {
-            aspect_ratio,
             image_width,
             image_height,
             center,
@@ -142,15 +105,7 @@ impl Camera {
             samples_per_pixel,
             pixel_samples_scale: 1.0 / f64::from(samples_per_pixel),
             max_depth,
-            vertical_field_of_view,
-            look_from,
-            look_at,
-            v_up,
-            u,
-            v,
-            w,
             defocus_angle,
-            focus_dist,
             defocus_disk_u,
             defocus_disk_v,
         }
