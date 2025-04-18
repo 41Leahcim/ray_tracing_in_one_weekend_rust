@@ -100,14 +100,15 @@ impl Camera {
         focus_dist: f64,
     ) -> Self {
         // Calculate the image height and ensure the image height is at least 1
-        let image_height = (image_width as f64 / aspect_ratio).max(1.0) as u32;
+        #[expect(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        let image_height = (f64::from(image_width) / aspect_ratio).max(1.0) as u32;
 
         // Camera properties
         // Viewport widths less than one are ok since they are real valued.
         let theta = vertical_field_of_view.to_radians();
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h * focus_dist;
-        let viewport_width = viewport_height * (image_width as f64 / image_height as f64);
+        let viewport_width = viewport_height * (f64::from(image_width) / f64::from(image_height));
         let center = look_from;
 
         // Calculate the u, v, w unit basis vectors for the camera coordinate frame
@@ -119,8 +120,8 @@ impl Camera {
         let viewport_u = viewport_width * u;
         let viewport_v = viewport_height * -v;
 
-        let pixel_delta_u = viewport_u / image_width as f64;
-        let pixel_delta_v = viewport_v / image_height as f64;
+        let pixel_delta_u = viewport_u / f64::from(image_width);
+        let pixel_delta_v = viewport_v / f64::from(image_height);
 
         // Calculate the location of the upper left pixel
         let viewport_upper_left = center - focus_dist * w - viewport_u / 2.0 - viewport_v / 2.0;

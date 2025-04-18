@@ -265,6 +265,7 @@ fn linear_to_gamma(linear_component: f64) -> f64 {
 }
 
 impl From<Color> for Rgb<u8> {
+    #[expect(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     fn from(value: Color) -> Self {
         // Translate the [0, 1) component values to the byte range [0, 255]
         const MAXIMUM: f64 = 0.999;
