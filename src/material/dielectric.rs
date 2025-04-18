@@ -10,6 +10,7 @@ pub struct Dielectric {
 }
 
 impl Dielectric {
+    #[must_use]
     pub const fn new(refraction_index: f64) -> Self {
         Self { refraction_index }
     }

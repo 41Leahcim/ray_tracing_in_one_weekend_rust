@@ -14,30 +14,37 @@ use rand::{random, random_range};
 pub struct Vec3([f64; 3]);
 
 impl Vec3 {
+    #[must_use]
     pub const fn new(elements: [f64; 3]) -> Self {
         Self(elements)
     }
 
+    #[must_use]
     pub const fn x(&self) -> f64 {
         self.0[0]
     }
 
+    #[must_use]
     pub const fn y(&self) -> f64 {
         self.0[1]
     }
 
+    #[must_use]
     pub const fn z(&self) -> f64 {
         self.0[2]
     }
 
+    #[must_use]
     pub fn length_squared(&self) -> f64 {
         self.0.iter().map(|&value| value * value).sum()
     }
 
+    #[must_use]
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
 
+    #[must_use]
     pub fn dot(&self, v: &Self) -> f64 {
         self.0
             .iter()
@@ -46,6 +53,7 @@ impl Vec3 {
             .sum()
     }
 
+    #[must_use]
     pub const fn cross(&self, v: &Self) -> Self {
         Self([
             self.0[1] * v.0[2] - self.0[2] * v.0[1],
@@ -54,18 +62,22 @@ impl Vec3 {
         ])
     }
 
+    #[must_use]
     pub fn unit_vector(self) -> Self {
         self / self.length()
     }
 
+    #[must_use]
     pub fn random() -> Self {
         Self(array::from_fn(|_| random()))
     }
 
+    #[must_use]
     pub fn random_range(range: Range<f64>) -> Self {
         Self(array::from_fn(|_| random_range(range.clone())))
     }
 
+    #[must_use]
     pub fn random_unit_vector() -> Self {
         loop {
             let point = Self::random_range(-1.0..1.0);
@@ -76,6 +88,7 @@ impl Vec3 {
         }
     }
 
+    #[must_use]
     pub fn random_on_hemisphere(&self) -> Self {
         let on_unit_sphere = Self::random_unit_vector();
         if self.dot(&on_unit_sphere) > 0.0 {
@@ -85,14 +98,17 @@ impl Vec3 {
         }
     }
 
+    #[must_use]
     pub fn near_zero(&self) -> bool {
         self.0.iter().all(|&value| value.abs() < 1e-8)
     }
 
+    #[must_use]
     pub fn reflect(self, n: &Self) -> Self {
         self - 2.0 * self.dot(n) * *n
     }
 
+    #[must_use]
     pub fn refract(&self, n: &Self, etai_over_etat: f64) -> Self {
         let cos_theta = n.dot(&-*self).min(1.0);
         let ray_out_perp = etai_over_etat * (*self + cos_theta * *n);
@@ -100,6 +116,7 @@ impl Vec3 {
         ray_out_perp + ray_out_parallel
     }
 
+    #[must_use]
     pub fn random_in_unit_disk() -> Vec3 {
         loop {
             let point = Vec3::new([random_range(-1.0..1.0), random_range(-1.0..1.0), 0.0]);

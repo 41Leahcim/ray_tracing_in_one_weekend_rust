@@ -14,26 +14,32 @@ impl Default for Interval {
 }
 
 impl Interval {
+    #[must_use]
     pub const fn new(min: f64, max: f64) -> Self {
         Self { min, max }
     }
 
+    #[must_use]
     pub const fn size(&self) -> f64 {
         self.max - self.min
     }
 
+    #[must_use]
     pub const fn contains(&self, value: f64) -> bool {
         self.min <= value && value <= self.max
     }
 
+    #[must_use]
     pub const fn surrounds(&self, value: f64) -> bool {
         self.min < value && value <= self.max
     }
 
+    #[must_use]
     pub const fn min(&self) -> f64 {
         self.min
     }
 
+    #[must_use]
     pub const fn max(&self) -> f64 {
         self.max
     }

@@ -8,6 +8,7 @@ pub struct HittableList {
 }
 
 impl HittableList {
+    #[must_use]
     pub const fn new(objects: Vec<Box<dyn Hittable + Sync>>) -> Self {
         Self { objects }
     }

@@ -86,6 +86,7 @@ pub struct Camera {
 
 impl Camera {
     #[expect(clippy::too_many_arguments)]
+    #[must_use]
     pub fn new(
         aspect_ratio: f64,
         image_width: u32,

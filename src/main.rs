@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use std::{sync::Arc, time::Instant};
 
 use camera::Camera;
@@ -35,7 +37,7 @@ fn main() {
     let world = HittableList::new(
         (-11..11)
             .flat_map(|a| (-11..11).map(move |b| (a, b)))
-            .flat_map(|(a, b)| {
+            .filter_map(|(a, b)| {
                 let choose_material = random::<f64>();
                 let center = Point3::new([
                     f64::from(a) + 0.9 * random::<f64>(),

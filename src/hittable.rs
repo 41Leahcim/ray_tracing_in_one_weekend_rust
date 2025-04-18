@@ -41,22 +41,27 @@ impl HitRecord {
         }
     }
 
+    #[must_use]
     pub const fn point(&self) -> Point3 {
         self.point
     }
 
+    #[must_use]
     pub const fn normal(&self) -> Vec3 {
         self.normal
     }
 
+    #[must_use]
     pub const fn time(&self) -> f64 {
         self.time
     }
 
+    #[must_use]
     pub fn material(&self) -> &dyn Material {
         self.material.as_ref()
     }
 
+    #[must_use]
     pub const fn front_face(&self) -> bool {
         self.front_face
     }

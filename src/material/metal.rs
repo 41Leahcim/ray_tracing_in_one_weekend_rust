@@ -12,6 +12,7 @@ pub struct Metal {
 }
 
 impl Metal {
+    #[must_use]
     pub const fn new(albedo: Color, fuzz: f64) -> Self {
         Self {
             albedo,
