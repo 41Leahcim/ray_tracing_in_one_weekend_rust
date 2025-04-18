@@ -138,7 +138,7 @@ impl Camera {
             pixel_delta_u,
             pixel_delta_v,
             samples_per_pixel,
-            pixel_samples_scale: 1.0 / samples_per_pixel as f64,
+            pixel_samples_scale: 1.0 / f64::from(samples_per_pixel),
             max_depth,
             vertical_field_of_view,
             look_from,

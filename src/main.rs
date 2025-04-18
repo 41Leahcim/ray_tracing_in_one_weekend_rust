@@ -1,8 +1,9 @@
 use std::{sync::Arc, time::Instant};
 
 use camera::Camera;
-use hittable::{list::HittableList, sphere::Sphere};
+use hittable::{Hittable, list::HittableList, sphere::Sphere};
 use material::{dielectric::Dielectric, lambertian::Lambertian, metal::Metal};
+use rand::{random, random_range};
 use vec3::{Color, Point3, Vec3};
 
 pub mod camera;
@@ -16,51 +17,67 @@ fn main() {
     let start = Instant::now();
 
     // World
-    let material_ground = Arc::new(Lambertian::new(Color::new([0.8, 0.8, 0.0])));
-    let material_center = Arc::new(Lambertian::new(Color::new([0.1, 0.2, 0.5])));
-    let material_left = Arc::new(Dielectric::new(1.5));
-    let material_bubble = Arc::new(Dielectric::new(1.0 / 1.5));
-    let material_right = Arc::new(Metal::new(Color::new([0.8, 0.6, 0.2]), 1.0));
+    let ground_material = Arc::new(Lambertian::new(Color::new([0.5, 0.5, 0.5])));
+    let material0 = Arc::new(Dielectric::new(1.5));
+    let material1 = Arc::new(Lambertian::new(Color::new([0.4, 0.2, 0.1])));
+    let material2 = Arc::new(Metal::new(Color::new([0.7, 0.6, 0.5]), 0.0));
 
-    let world = HittableList::new(vec![
+    let objects: [Box<dyn Hittable + Sync>; 4] = [
         Box::new(Sphere::new(
-            Point3::new([0.0, -100.5, -1.0]),
-            100.0,
-            material_ground,
+            Point3::new([0.0, -1000.0, 0.0]),
+            1000.0,
+            ground_material,
         )),
-        Box::new(Sphere::new(
-            Point3::new([0.0, 0.0, -1.2]),
-            0.5,
-            material_center,
-        )),
-        Box::new(Sphere::new(
-            Point3::new([-1.0, 0.0, -1.0]),
-            0.5,
-            material_left,
-        )),
-        Box::new(Sphere::new(
-            Point3::new([-1.0, 0.0, -1.0]),
-            0.4,
-            material_bubble,
-        )),
-        Box::new(Sphere::new(
-            Point3::new([1.0, 0.0, -1.0]),
-            0.5,
-            material_right,
-        )),
-    ]);
+        Box::new(Sphere::new(Point3::new([0.0, 1.0, 0.0]), 1.0, material0)),
+        Box::new(Sphere::new(Point3::new([-4.0, 1.0, 0.0]), 1.0, material1)),
+        Box::new(Sphere::new(Point3::new([4.0, 1.0, 0.0]), 1.0, material2)),
+    ];
+    let world = HittableList::new(
+        (-11..11)
+            .flat_map(|a| (-11..11).map(move |b| (a, b)))
+            .flat_map(|(a, b)| {
+                let choose_material = random::<f64>();
+                let center = Point3::new([
+                    f64::from(a) + 0.9 * random::<f64>(),
+                    0.2,
+                    f64::from(b) + 0.9 * random::<f64>(),
+                ]);
+                if (center - Point3::new([4.0, 0.2, 0.0])).length() <= 0.9 {
+                    return None;
+                }
+                Some::<Box<dyn Hittable + Sync>>(Box::new(Sphere::new(
+                    center,
+                    0.2,
+                    match choose_material {
+                        // Diffuse
+                        ..0.8 => {
+                            let albedo = Color::random() * Color::random();
+                            Arc::new(Lambertian::new(albedo))
+                        }
+                        ..0.95 => {
+                            let albedo = Color::random_range(0.5..1.0);
+                            let fuzz = random_range::<f64, _>(0.0..0.5);
+                            Arc::new(Metal::new(albedo, fuzz))
+                        }
+                        _ => Arc::new(Dielectric::new(1.5)),
+                    },
+                )))
+            })
+            .chain(objects)
+            .collect(),
+    );
 
     let camera = Camera::new(
         16.0 / 9.0,
-        540,
-        100,
+        1200,
+        500,
         50,
         20.0,
-        Vec3::new([-2.0, 2.0, 1.0]),
-        Point3::new([0.0, 0.0, -1.0]),
+        Vec3::new([13.0, 2.0, 3.0]),
+        Point3::new([0.0; 3]),
         Vec3::new([0.0, 1.0, 0.0]),
+        0.6,
         10.0,
-        3.4,
     );
     camera.render(&world);
 
