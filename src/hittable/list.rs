@@ -1,4 +1,4 @@
-use crate::interval::Interval;
+use crate::{interval::Interval, ray::Ray};
 
 use super::{HitRecord, Hittable};
 
@@ -22,18 +22,10 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &crate::ray::Ray, ray_time: Interval) -> Option<HitRecord> {
-        let mut record = None;
-        let mut closest_so_far = ray_time.max();
-
-        for object in &self.objects {
-            if let Some(temp_record) =
-                object.hit(ray, Interval::new(ray_time.min(), closest_so_far))
-            {
-                closest_so_far = temp_record.time;
-                record = Some(temp_record);
-            }
-        }
-        record
+    fn hit(&self, ray: &Ray, ray_time: Interval) -> Option<HitRecord> {
+        self.objects
+            .iter()
+            .filter_map(|object| object.hit(ray, ray_time))
+            .min_by(|left, right| left.time.total_cmp(&right.time))
     }
 }
